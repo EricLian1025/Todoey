@@ -14,10 +14,13 @@ class TodoListController: UITableViewController
     var itemArray = [item]()
     let userdefault = UserDefaults.standard
     
+    let dataFilePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("items plist")
+    
+    
     override func viewDidLoad()
     {
         super.viewDidLoad()
-      
+ 
         let newitem = item()
         newitem.title = "hello"
         itemArray.append(newitem)
@@ -31,11 +34,12 @@ class TodoListController: UITableViewController
         itemArray.append(newitem3)
         
         
-        if let items = userdefault.array(forKey: "Todolistarray") as? [item]
-        {
-            itemArray = items
-        }
-     
+//        if let items = userdefault.array(forKey: "Todolistarray") as? [item]
+//        {
+//            itemArray = items
+//        }
+ 
+        loaditems()
         
     }
     
@@ -61,18 +65,11 @@ class TodoListController: UITableViewController
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath)
     {
-        
-//        if itemArray[indexPath.row].done == false
-//        {
-//            itemArray[indexPath.row].done = true
-//        }
-//        else
-//        {
-//            itemArray[indexPath.row].done = false
-//        }
-
         itemArray[indexPath.row].done  = !itemArray[indexPath.row].done
-        tableView.reloadData()
+        self.saveitem()
+        tableView.reloadData() // to call cellforeowat delegate then
+        //1. ture or false
+        //2. reload all data - mark or unmark
         tableView.deselectRow(at: indexPath, animated: true)
     }
     
@@ -93,7 +90,8 @@ class TodoListController: UITableViewController
             
             self.itemArray.append(newitem)
    
-            self.userdefault.setValue(self.itemArray, forKey: "Todolistarray")
+          //  self.userdefault.setValue(self.itemArray, forKey: "Todolistarray")
+          self.saveitem()
             
             self.tableView.reloadData()
             
@@ -111,6 +109,38 @@ class TodoListController: UITableViewController
      
     }
     
+    // func saveitem method
+    func saveitem()
+    {
+        let encoder_ = PropertyListEncoder()
+        do
+        {
+            let datas = try encoder_.encode(itemArray)
+            try datas.write(to: dataFilePath!)
+        }
+        catch
+        {
+            print("Error occurred. Reason is-\(error)")
+        }
+        
+    }
     
+    // load encode function
+    func loaditems()
+    {
+        if let data = try? Data(contentsOf: dataFilePath!)
+        {
+            let decoder_ = PropertyListDecoder()
+            do
+            {
+              itemArray = try decoder_.decode([item].self, from: data)
+            }
+            catch
+            {
+                print("Error occurred. Reason is-\(error)")
+            }
+        }
+        
+    }
 }
 

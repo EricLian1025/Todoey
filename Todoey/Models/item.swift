@@ -8,10 +8,10 @@
 
 import Foundation
 
-class  item
+class item : Encodable,Decodable
 {
     var title : String = ""
-    var done : Bool = true
+    var done : Bool = false
     
     
     
